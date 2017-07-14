@@ -498,12 +498,78 @@ The user can now re-iterate the process with another data-inference cycle, pre-p
 \section{Progress Metric}
 The Progress Metric shall be a simple visualisation of inference accuracy as detected by MAE. The metric shall consider:
 \begin{itemize}
-	\item Bounding box precision (percent).
+	\item Bounding box precision.
 	\item Object prediction accuracy (boolean; whether the object was classified correctly).
 	\item Object detection status (boolean; whether the object was detected by the model or was manually labelled after inference).
 	\item Object tracking accuracy (if applicable; boolean; whether the object was tracked between adjacent frames).
 \end{itemize}
 
+\subsection{Bounding box precision}
+We use IoU (Intersection over Union) to measure the bounding box precision. The IoU value is in-turn used to map object bounding boxes between the ground truth and model prediction.
+\begin{figure}
+\centering
+\includegraphics[width=\figwidthb]{fig/iou_equation.png}
+\caption{IoU equation.} \label{fig.structure}
+\end{figure}
+
+\subsection{Accuracy counts}
+The accuracy counts calculated for each class/label for the comprehensive evaluation result are:
+\begin{itemize}
+	\item True Positives. 
+	\begin{displaymath}
+	\mathbf{t}_p
+	\end{displaymath}
+	This is the number of bounding boxes classified correctly according to the labels used to train the model. Say, when an object, car is correctly classified as a car.
+	\item False Positives
+	\begin{displaymath}
+	\mathbf{f}_p
+	\end{displaymath}
+	This is the number of bounding boxes classified in-correctly according to the labels used to train the model. Say, when an object, car is incorrectly classified as a truck.
+	\item True Negatives
+	\begin{displaymath}
+	\mathbf{t}_n
+	\end{displaymath}
+	This is the number of bounding boxes classified correctly as objects the model was not trained for. Say, when an object airplane whose classification is not desired is left unpredicted.
+	\item False Negatives
+	\begin{displaymath}
+	\mathbf{f}_n
+	\end{displaymath}
+	This is the number of bounding boxes classified in-correctly as valid objects. Say, when an object airplane whose classification is not desired is classified as a car.
+\end{itemize}
+
+\subsection{Precision}
+	Precision is the percentage of true positives in the classified objects' list. Thus, precision is a metric associated with a single class.
+	\begin{align}
+	\mathbf{precision}=\mathbf{t}_p / (\mathbf{t}_p + \mathbf{f}_p) = \mathbf{t}_p / {n}
+	\end{align}
+	where $\mathbf{n}$ is the total number of objects classified by the model.
+\subsection{Recall}
+	Recall is the percentage of objects correctly classified. Thus, recall is a metric associated with a single class.
+	\begin{align}
+	\mathbf{precision}=\mathbf{t}_p / (\mathbf{t}_p + \mathbf{f}_n)
+	\end{align}
+\subsection{Precision Recall Graph for each class}
+	Rule of thumb is that a good model shall maintain high precision and high recall with different threshold values used for the classification score/probability. Thus a precision-recall graph plotted between the precision and recall values of a class across the frame or video for different subsets of predicted output, give us a pretty good visualisation of the model quality. The subset used here is sampled from the list of classified bounding boxes, sorted with the model's score value. The subset shall move from as low as one object to all the objects in the list. Popular evaluation models like the one used with VOC Challenge uses a 11-point sampling, but we propose the more accurate k-point sampling, where we plot precision-recall values for every subset that results a change in the accuracy count metric.
+\begin{figure}
+\centering
+\includegraphics[width=\figwidthb]{fig/pr_rcnn.png}
+\caption{Prediction recall curve when we ran RCNN for a 2 second video.} \label{fig.structure}
+\end{figure}
+
+\subsection{Average Precision for each class}
+	Average precision is the single number derived from the above graph, simply by taking the area under the plotted curve.
+	$${AP} = \int_{0}^{1} P(r) dr$$
+	Practically the area under the curve could be implemented as:
+	$${AP} = \sum_{k=1}^{N} P(k) {\Delta}r(k)$$
+\subsection{Interpolated Average Precision for each class}
+	Interpolated average precision is calculated the same way as we calculated {AP} above, but, instead of using {P(k)}, the maximum precision value: 
+	$${max}_{k\textsuperscript{'}>= k} {P(k\textsuperscript{'})}$$
+	Thus:
+	$${IAP} = \sum_{k=1}^{N} {max}_{k\textsuperscript{'}>= k} {P(k\textsuperscript{'})} {\Delta}r(k)$$
+
+\subsection{Mean Average Precision across all the classes the model was trained on}
+	Mean average precision, {mAP} is the mean of the {AP} values calculated for each of the classes supported by the model. 
+	
 %Math symbol: $\hat{r}_{n,m}^{(k)}$.
 
 %Equations:
