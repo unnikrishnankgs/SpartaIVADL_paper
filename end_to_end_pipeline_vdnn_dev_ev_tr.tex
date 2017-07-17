@@ -353,7 +353,7 @@ g} \fi
 % not capitalized unless they are the first or last word of the title.
 % Linebreaks \\ can be used within to get better formatting as desired.
 % Do not put math or special symbols in the title.
-\title{End-to-end pipeline for video based deep neural network development, evaluation and training}
+\title{End-to-end pipeline for ground truth generation, video annotation and evaluation of object classifier models}
 %Improved Video Annotation and Modelling tool
 
 % author names and affiliations
@@ -377,7 +377,7 @@ g} \fi
 %Fax: (888) 555--1212}}
 
 
- \author{\IEEEauthorblockN{Unnikrishnan Kizhakkemadam Sreekumar, Kaikai Liu}
+ \author{\IEEEauthorblockN{Unnikrishnan Kizhakkemadam Sreekumar, Qi Li, Revathy Devaraj, Kaikai Liu}
  \IEEEauthorblockA{Computer Engineering Department\\
  San Jose State University (SJSU)\\
  San Jose, CA, USA
@@ -421,13 +421,13 @@ g} \fi
 % As a general rule, do not put math, special symbols or citations
 % in the abstract
 \begin{abstract}
-Video annotation as a means to gather training data-set is proven to be beneficial in the progress of machine learning and deep learning techniques. Recently, front-ends to achieve easy and efficient DNN prototyping has gained much attention in the deep learning domain. A system where one can load DNN models under development, study or evaluation and apply them directly on the video to learn model accuracy is not readily available. Such close integration of annotation, training, model development and evaluation is the best way to rapidly prototype a deep learning application. With this paper, we discuss a system implementing the end-to-end pipeline which help achieve faster prototyping and research. The system inherently support Darknet with YOLO (the system allows easy integration with other models under development). 
+Video annotation as a means to gather training data-set is proven to be beneficial in the progress of machine learning and deep learning techniques. Recently, front-ends to achieve easy and efficient (deep neural network) DNN prototyping has gained much attention in the deep learning domain. A system where one can load DNN models under development, study or evaluation and apply them directly on the video to learn model accuracy is not readily available. Such close integration of automatic annotation and evaluation is the best way to rapidly generate ground truth and evaluate models on a high level. With this paper, we discuss a system implementing the end-to-end pipeline which help achieve faster ground truth generation, evaluation, and research. The system inherently support Darknet with YOLO and tensorflow based object detection and classification models like Faster-RCNN (the system allows easy integration with other models). 
 The easy to use front-end provide the interface to load user supplied configuration and weights files along with triggers to run the model on videos or image-lists captured particularly to generate data-sets for further training, research or prototyping.
 \end{abstract}
 
 % no keywords
 \begin{IEEEkeywords}
-Video annotation, pipelined-supervised learning, interactive annotation tool.
+Video annotation, pipelined-supervised learning, interactive annotation tool, ground truth generation.
 \end{IEEEkeywords}
 
 
@@ -444,9 +444,9 @@ Video annotation, pipelined-supervised learning, interactive annotation tool.
 
 
 \section{Introduction}
-An interactive video annotation tool where one can easily annotate objects, train their model, learn the progress metric and work on rapid prototyping is the holy grail of model development and research. This paper presents a system which enable such pipelined supervised training. The system keeps track of the progress metric in terms of object prediction accuracy, bounding box precision and undetected objects that are manually added. This progress metric helps the researcher to easily track weak spots and improve on the learning algorithm. The comprehensive evaluation module deals with automatic progress evaluation with easy to understand representation of pitfalls, accuracy measures and errors on a per object, per frame basis throughout the video. \par
-The system discussed in this paper is developed as part of a research project aimed at creating an ecosystem that supports easy prototyping and study of deep learning technology and neural network models. \par
-Furthermore, the system discussed in this paper supports labelling and learning an infinite number of objects.  
+An interactive video annotation tool where one can easily annotate objects, visualize the evaluation metric and work on rapid prototyping is the holy grail of model evaluation, application development and research. This paper presents a system which enable such pipelined ground truth generation and evaluation of multiple models against the generated ground truth. The system keeps track of the evaluation metric in terms of object classification accuracy, bounding box precision and undetected objects that are manually added. This evaluation metric could even help the researcher to easily track weak spots and improve on the learning algorithm. The comprehensive evaluation module deals with automatic model evaluation with easy to understand representation of pitfalls, accuracy measures and errors on a per class, per frame, per video basis. \par
+The system discussed in this paper is developed as part of a research project aimed at creating an ecosystem that supports easy ground truth generation, model evaluation and application development. The tool helps developers to quickly generate ground truth for classes of interest, evaluate available DNN models for those classes and . \par
+Furthermore, the system discussed in this paper supports labelling and learning an infinite number of classes.  
 
 \section{System Overview}\label{sec.overview}
 
@@ -546,7 +546,7 @@ The accuracy counts calculated for each class/label for the comprehensive evalua
 \subsection{Recall}
 	Recall is the percentage of objects correctly classified. Thus, recall is a metric associated with a single class.
 	\begin{align}
-	\mathbf{precision}=\mathbf{t}_p / (\mathbf{t}_p + \mathbf{f}_n)
+	\mathbf{recall}=\mathbf{t}_p / (\mathbf{t}_p + \mathbf{f}_n)
 	\end{align}
 \subsection{Precision Recall Graph for each class}
 	Rule of thumb is that a good model shall maintain high precision and high recall with different threshold values used for the classification score/probability. Thus a precision-recall graph plotted between the precision and recall values of a class across the frame or video for different subsets of predicted output, give us a pretty good visualisation of the model quality. The subset used here is sampled from the list of classified bounding boxes, sorted with the model's score value. The subset shall move from as low as one object to all the objects in the list. Popular evaluation models like the one used with VOC Challenge uses a 11-point sampling, but we propose the more accurate k-point sampling, where we plot precision-recall values for every subset that results a change in the accuracy count metric.
