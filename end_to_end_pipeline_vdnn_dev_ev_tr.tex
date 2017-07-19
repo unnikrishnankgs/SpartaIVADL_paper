@@ -592,10 +592,18 @@ The accuracy counts calculated for each class/label for the comprehensive evalua
 
 
 \section{Related Work}\label{sec.related}
+
+In the field of the tools for annotation, there exists a large number of them. However, for video, the tools aren?t as many as people expected, for the context just got more complicated. There is the \cite{vondrick2011vatic}, which is a multi-functional browser-based video annotation tool. It supports OpenCV to track objects in videos. The drawback for this tool is that it is not that easy to deploy onto a designated platform. It has so many dependencies that even a successful setup can take a long time. It is also hard to set up an annotation task in the system.
+
+Another tool available is \cite{doennann2000ViPER}. It support video annotation, but more focus on the spatial labelling. It provides performance evaluation. Unfortunately, this toolkit is a Java program that does not base on browser and only supports Windows operating system.
+
+\cite{shen2016beaverdam} is the most likely candidate we have in mind. It is easy to install and host. It supports Amazon?s Mechanical Turk like VATIC does. It is browser-based. However, it cannot separates the annotation work (range of the video datasets) based on individual user or user group.
+
+For the Deep Learning purpose, we further developed BeaverDam, combined the evaluation concepts of \cite{everingham2010vocchallenge}, and created a unique browser-based, user-based, end to end video annotation tool, which integrated with object detection models to reduce the annotation workload.
+
 The need for having an end-to-end pipeline for DNN modelling and training has been tackled by the project named DIGITS. NVIDIA provides DIGITS under the BSD license, available at http://github.com/NVIDIA/DIGITS. The essential difference between DIGITS and the system proposed in this paper is the fact that our system attempts to closely integrate data-set generation techniques like video annotation and modelling together. This substantially mitigate the ordeal involved with training and modelling of deep neural networks.
 
 There are some projects discussing the process of automatically annotating videos using deep learning like \cite{baptist2016automatedendtoend}, with a focus on multimedia archive search-ability. 
-
 
 \section{Conclusion}\label{sec.conclusion}
 
@@ -658,8 +666,6 @@ J. Redmon and A. Farhadi. (2016, December 25).
 \textit{YOLO9000: Better, Faster, Stronger} (\textit{2nd ed.}) [Online]. Available: https://arxiv.org/abs/1612.08242
 
 \end{thebibliography}
-
-
 
 % that's all folks
 \end{document}
