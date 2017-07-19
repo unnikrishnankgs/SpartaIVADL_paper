@@ -505,12 +505,16 @@ The Progress Metric shall be a simple visualisation of inference accuracy as det
 \end{itemize}
 
 \subsection{Bounding box precision}
-We use IoU (Intersection over Union) to measure the bounding box precision. The IoU value is in-turn used to map object bounding boxes between the ground truth and model prediction.
-\begin{figure}
-\centering
-\includegraphics[width=\figwidthb]{fig/iou_equation.png}
-\caption{IoU equation.} \label{fig.structure}
-\end{figure}
+We use IoU (Intersection over Union) to measure the bounding box precision. The IoU value is in-turn used to map object bounding boxes between the ground truth and model prediction. 
+\begin{align}
+{IoU}={Area of Overlap} / {Area of Union}
+\end{align}
+
+%\begin{figure}
+%\centering
+%\includegraphics[width=\figwidthb]{fig/iou_equation.png}
+%\caption{IoU equation.} \label{fig.structure}
+%\end{figure}
 
 \subsection{Accuracy counts}
 The accuracy counts calculated for each class/label for the comprehensive evaluation result are:
