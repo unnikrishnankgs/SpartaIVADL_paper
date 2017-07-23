@@ -447,12 +447,12 @@ The system discussed in this paper is developed as part of a research project ai
 In order to reduce the annotation work for the worker, BeaverDam uses interpolation to annotate a video between two manually annotated frames. Although this approach lowers the complexity for the worker, the accuracy for bounding boxes are not guaranteed and the interpolated results are discarded during the process. In this paper, we will present a new approach to generate the annotated bounding boxes automatically with a high precision.\par
 Furthermore, the system discussed in this paper supports labelling and learning an infinite number of classes.  \par
 
-\section{System Overview}\label{sec.overview}
+\section{Proposed System}\label{sec.overview}
 
 \subsection{Motivation}
 
 \subsection{System Architecture}
-The system presented in this paper implements the core functionality in a server module. The server module will be a web application which could be hosted on a CUDA enabled server, like the NVIDIA DGX.
+The Integrated Video Annotation for Deep Learning (IVADL) tool is a web application built on the existing Beaver Dam Video annotation tool [1] . The proposed system consists of three major components: (i) A server and the database with the evaluation engine (ii) The Client Interface(CI) with an easy-to-use User Interface(UI) to display the annotation and evaluation results (iii) The Model Interface(MI) that connects the pre-trained classification models used for auto-annotation. Fig [1]  describes the architecture of the proposed system with each module described in detail in the preceding sub-sections. 
 
 \begin{figure}[htb]
 \centering
@@ -461,114 +461,65 @@ The system presented in this paper implements the core functionality in a server
 \end{figure}
 
 \subsubsection{Server}
-There shall be a web server hosted with the video/image-set database. The server implements basic video annotation features like user-account, video annotation data and label management. There can be administrator users and staff users. Administrator will be able to add/delete users, add/delete video annotation jobs, add/delete classification labels for annotaion. Staff users will be able to view the video annotation jobs and annotate appropriately the objects identified under the list of provided labels.
+The back-end of the system is the Server hosting  the  video/image-set database in [? where to deploy the web app]. The server module could be hosted on a CUDA enabled server, like the NVIDIA DGX. It implements basic video annotation features like managing user-account, retrieving annotation data, evaluating the metrics, presenting the results and managing the classification label. There can be administrator users and staff users. Administrator will be able to add/delete users, video annotation jobs, classification labels for annotation. Staff users will be able to view the video annotation jobs and annotate appropriately the objects identified under the list of provided labels.
 \subsubsection{Model interface (MI)}
-The model-interface defines an extensive API, bridging the communication between the Server and deep-learning neural network models under research.
-\subsubsection{A deep neural network model (DNN)}
-A deep learning neural network model like the convolutional (CNN) YOLO model which was used to implement the system discussed in this paper.
+The classifier models are the core component of the auto-annotation system. With a view to make the system flexible, application programming interface (API) is provided as a part of the system to add/remove models, select from multiple models, compare the  evaluation results between selected models. This design provides two major functionality (i) Allows user to select among various classifier algorithms based on its performance (ii)  Allows user to  to run the new models for evaluation of its metrics.[details about API ??] . The system by default is integrated with two popular models (i) YOLO [2] , darknet based model (ii) Fast RCNN [3] , tensorflow based model. Section 3.2 describes these selected models.
 \subsubsection{Metric analysis engine (MAE)}
-The metric analysis engine appropriately calculate the progress-metric as discussed in the workflow section below.
+The metric analysis engine is a part of server that performs high-level evaluation of the annotation results and models performance metrics[1].  The evaluation methodology is based on the PASCAL VOC 2009 Challenge [4] and the techniques that are used to detect accuracy counts [5] is based on paper[6]. In addition it supports filtered list of user selected classifiers for evaluation of its metrics. The tuning parameters such as IoU ratio threshold, confidence score of a prediction are user configurable. The MAE shall evaluate the following metrics:
+(i) Bounding box confidence score and precision (ii)Accuracy count of the model inference (iii) F1 score,Precision and Recall values for all the classifiers (iv) Average precision and Mean Average precision of a classifier model.These metrics and its evaluation are presented graphically in a table or graph format by MAE as shown below. 
 \subsubsection{Client interface (CI)}
-The client interface is managed by the web server.
-\subsubsection{Browser}
-The client browser shall render the user interfaces for:
-\begin{itemize}
-	\item Manual video annotation and corrections
-	\item DNN model configuration
-	\item DNN model run
-	\item View comprehensive evaluation
-\end{itemize}
+The client interface is a web browser where it shall render the user interfaces for: (i) Manual correction of video annotation (ii) Selection and configuration of classifier model (iii) running auto-annotation (iv) view comprehensive evaluation report. The precision of all bounding boxes are color coded to visually represent the values. The UI supports list of labels that can be auto-annotated by the models and enables user to filter the labels to view and evaluate those classes. The evaluation summary view presents the data for each model selected for evaluation with the video play option to support per frame evaluation. 
 
-\section{Workflow}
-\subsection{Data Inference Level}
-The tool runs the model with saved configurations on the input video and saves the generated annotation data-set in the database. This enables the researcher to visually see the error and correct any of them. The tool in the background calculates:
-\begin{itemize}
-	\item the error for each annotation made (at box level).
-	\item un-detected objects which the user was able to detect.
-	\item And the such.
-\end{itemize}
 
-\subsection{Training}
-The user can then train the model again with the new data-set. 
+\section{Methodology}
+\subsection{Annotation Method} \label{sec.annotation}
+In order to perform auto-annotation of the video sequence on real-time basis, we propose to use the state-of-art real-time object detection systems with high-accuracy. Two such models we chose to integrate to IVADL tool by default are YOLO9000 [1] and FAST RCNN [2]. [add details about these models, labels, training details, dataset used]. These models support the frame level and sequence level object detection and classification. The technique we propose for ground truth generation is to first run the model on the entire video to generate the predicted list of objects by the model and do manual correction of the predicted list to generate the final ground truth for the given data-set. This ground truth data is then used for the evaluation of each of the object classifiers and compare the relative performance of those models. \par
 
-\subsection{Loop continues}
-The user can now re-iterate the process with another data-inference cycle, pre-processing data and triggering the data-set generation. MAE shall learn the changes with new data-set against the old, backup the accurate manually corrected data and provides the user with the improvement metric and areas at fault. MAE uses video overlays to depict the metric at a frame level over the source video data.
+Let F = \textit{ f1, f2, f3,.., fn}  be the video sequence with n frames Let P =  \textit{p1, p2, p3,..., pn}  be the predicted  object list for corresponding frames of F, generated by the classifier model. Let BB be the set of bounding boxes that represent the classified objects in F and  for each object let bbx =  \textit{x, y, w, h, f, t} where  x ,y is  X co-ordinate and Y co-ordinate of the starting point of a bounding box, w is width of the bounding box, h is height of the bounding  box, f is the frame id where the bounding box is located, t is the tracker flag updated by the object tracking model . On running the selected classifier models on F, initial ground truth list P is generated.Currently the system we propose employs manual correction of P to generate G, where G is the final ground truth with the highest accuracy that is to be used for evaluation of other models integrated to the system. \par
 
-\section{Progress Metric}
-The Progress Metric shall be a simple visualization of inference accuracy as detected by MAE. The metric shall consider:
-\begin{itemize}
-	\item Bounding box precision.
-	\item Object prediction accuracy (boolean; whether the object was classified correctly).
-	\item Object detection status (boolean; whether the object was detected by the model or was manually labelled after inference).
-	\item Object tracking accuracy (if applicable; boolean; whether the object was tracked between adjacent frames).
-\end{itemize}
-The above evaluated metrics are presented graphically in a table or graph format as shown below. 
+Along with annotation of objects, we propose to use object tracking models to correlate the predicted bounding boxes of each frame in F. [add details about object tracker]. After generating G, the result of the annotation phase on running model 1 is P1 object list, for model 2 is P2 object list.
 
+\subsection{Evaluation Method} \label{sec.evaluation}
+The evaluation of P1,P2 objects list described in section \ref{sec.annotation} are based on the method used by PASCAL VOC09 challenge evaluation [1]. According to PASCAL VOC evaluation[1] three accuracy metrics are computed to evaluate a multi-class models (i) Precision-Recall values with different rank cutoff (ii) Average precision representing the area of Precision-Recall curve (iii) mean average precision for all the classes in a multi-class model. Prior to the computation of above listed accuracy metrics, the predicted objects and its bounding boxes are verified against the ground truth objects by calculating its IoU (Intersection of Union) and the computation details are explained in the following subsection.
+\subsubsection{IoU} \label{ref.iou}
+We use IoU for 2 purposes (i) Mapping the bounding boxes \textit{bbx} between predicted object list and ground truth object list (ii) bounding box precision is evaluated using IoU where the threshold for IoU is a tunable parameter set by the user. By calculating IoU for each \textit{bbx} in G with all  \textit{bbx} in P, the pair with max IoU value is mapped with same bounding box ID. Let  A$_{\text{g}}$ be the area of ground truth bounding box, A{$_{\text{p}}$} be the area of predicted bounding box, then IoU is calculated using the formula below.
+\begin{align}
+{IoU}= \frac {A_g \cap  A_p} {A_g \cup A_p}
+\end{align}
+\begin{align}
+{bbID_g,_p} = {max ( IoU ( bbx_g , \forall  bbx_p ))}
+\end{align}
+\subsubsection{Accuracy Metrics} \label{ref.accuracy}
+The common evaluation metrics for classification models has 4 basic accuracy counts[1] (i) True Positive (ii) True negatives (iii) False Positive (iv) False negatives, that is used to find the precision and recall values as mentioned above. These metrics are calculated for each class/label of the multi-class model.In the system we propose, we support calculation of these metrics on frame by frame basis and for complete video sequence. Let t{$_{\text{p}}$} be true positive that represent the number of objects classified correctly, f{$_{\text{p}}$} be false positive that is the number of objects classified in-correctly in the predicted list.  Let t{$_{\text{n}}$} be true positive that represent the number of objects not classified correctly, f{$_{\text{n}}$} be false negative that is the number of objects not classified in-correctly in the predicted list. The precision indicates the percentage of true positives in the classified objects' list and recall is a measure of the percentage of objects correctly classified.
+\begin{align}
+{Precision}= \frac {t_p} {t_p + f_p}
+\end{align}
+\begin{align}
+{Recall}= \frac {t_p} {t_p + f_n}
+\end{align}
+\subsubsection{Precision Recall Graph for each class}
+The performance of a model is denoted by numerical value called Average precision of a class in a multi-class model. A model is considered good if its with high precision and recall values measured for different ranks values. Thus the area under precision-recall curve represents models performance and it is plotted between the precision and recall values of a class across the frame or video for different subsets of predicted output, giving us a pretty good visualization of the model quality. The subset used here is sampled from the list of classified bounding boxes, sorted with the model's rank. Popular evaluation models like the one used with VOC Challenge[1] uses a 11-point sampling, but we propose the more accurate k-point sampling, where we plot precision-recall values for every subset that results a change in the recall metric.
+	$${AP} = \sum_{k=1}^{N} P(k) {\Delta}r(k)$$
+\subsubsection{Mean Average Precision}
+	Mean average precision, {mAP} is the mean of the {AP} values calculated for each of the classes supported by the multi-class model. This measure is a single-valued metric used to compare the models performance. Model with high value of {mAP} is the desired one used for application. The evaluation results enables the user to compare different models and select the model for a specific application. This system thus provides the user mechanism for rapid ground truth generation and model selection.The evaluation metrics are displayed in the below table format,
+\begin{align}
 \begin{tabular}{| c | c | c | c | c | c | c | }
 \hline
-Model & Class (CAR)  & & & & Classes \\ 
+Model & Class (CAR) & & & & & Classes \\ 
 \hline 
      & tp & tn & fp & fn & AP & mAP \\ 
 YOLO & 769 & 0 &  108 & 56 & 0.89 & 0.19  \\
 FRCNN & 723 & 0 & 3 & 5 & 0.99 & 0.974 \\
 \hline
 \end{tabular}
-
-
-\subsection{Bounding box precision}
-<<<<<<< HEAD
-We use IoU (Intersection over Union) to measure the bounding box precision. The IoU value is in-turn used to map object bounding boxes between the ground truth and model prediction. 
-=======
-We use IoU (Intersection over Union) to measure the bounding box precision. The IoU value is in-turn used to map object bounding boxes between the ground truth and model prediction.
->>>>>>> 7b0e570d5ba54e3273ba3b2686855061a0ef154a
-\begin{align}
-{IoU}={Area of Overlap} / {Area of Union}
 \end{align}
 
-%\begin{figure}
-%\centering
-%\includegraphics[width=\figwidthb]{fig/iou_equation.png}
-%\caption{IoU equation.} \label{fig.structure}
-%\end{figure}
 
-\subsection{Accuracy counts}
-The accuracy counts calculated for each class/label for the comprehensive evaluation result are:
-\begin{itemize}
-	\item True Positives (tp). 
-	%\begin{displaymath}
-	%\mathbf{t}_p
-	%\end{displaymath}
-	This is the number of bounding boxes classified correctly according to the labels used to train the model. Say, when an object, car is correctly classified as a car.
-	\item False Positives (fp).
-	%\begin{displaymath}
-	%\mathbf{f}_p
-	%\end{displaymath}
-	This is the number of bounding boxes classified in-correctly according to the labels used to train the model. Say, when an object, car is incorrectly classified as a truck.
-	\item True Negatives (tn).
-	%\begin{displaymath}
-	%\mathbf{t}_n
-	%\end{displaymath}
-	This is the number of bounding boxes classified correctly as objects the model was not trained for. Say, when an object airplane whose classification is not desired is left unpredicted.
-	\item False Negatives (fn).
-	%\begin{displaymath}
-	%\mathbf{f}_n
-	%\end{displaymath}
-	This is the number of bounding boxes classified in-correctly as valid objects. Say, when an object airplane whose classification is not desired is classified as a car.
-\end{itemize}
 
-\subsection{Precision}
-	Precision is the percentage of true positives in the classified objects' list. Thus, precision is a metric associated with a single class.
-	\begin{align}
-	\mathbf{precision}=\mathbf{t}_p / (\mathbf{t}_p + \mathbf{f}_p) = \mathbf{t}_p / {n}
-	\end{align}
-	where $\mathbf{n}$ is the total number of objects classified by the model.
-\subsection{Recall}
-	Recall is the percentage of objects correctly classified. Thus, recall is a metric associated with a single class.
-	\begin{align}
-	\mathbf{recall}=\mathbf{t}_p / (\mathbf{t}_p + \mathbf{f}_n)
-	\end{align}
-\subsection{Precision Recall Graph for each class}
-	Rule of thumb is that a good model shall maintain high precision and high recall with different threshold values used for the classification score/probability. Thus a precision-recall graph plotted between the precision and recall values of a class across the frame or video for different subsets of predicted output, give us a pretty good visualisation of the model quality. The subset used here is sampled from the list of classified bounding boxes, sorted with the model's score value. The subset shall move from as low as one object to all the objects in the list. Popular evaluation models like the one used with VOC Challenge uses a 11-point sampling, but we propose the more accurate k-point sampling, where we plot precision-recall values for every subset that results a change in the accuracy count metric.
+
+\section{Experiment} \label{sec.experiment}
+\subsection{Data} \label{sec.data}
+\subsection{Results} \label{sec.results}
 \begin{figure}
 \centering
 \includegraphics[width=\figwidthb]{fig/pr_rcnn.png}
@@ -580,31 +531,17 @@ The accuracy counts calculated for each class/label for the comprehensive evalua
 \includegraphics[width=\figwidthb]{fig/pr_yolo.png}
 \caption{Prediction recall curve when we ran YOLO, class "Car" for a 2 second video.} \label{fig.structure}
 \end{figure}
+\subsection{Future Work}
 
-\subsection{Average Precision for each class}
-	Average precision is the single number derived from the above graph, simply by taking the area under the plotted curve.
-	$${AP} = \int_{0}^{1} P(r) dr$$
-	Practically the area under the curve could be implemented as:
-	$${AP} = \sum_{k=1}^{N} P(k) {\Delta}r(k)$$
-\subsection{Interpolated Average Precision for each class}
-	Interpolated average precision is calculated the same way as we calculated {AP} above, but, instead of using {P(k)}, the maximum precision value: 
-	$${max}_{k\textsuperscript{'}>= k} {P(k\textsuperscript{'})}$$
-	Thus:
-	$${IAP} = \sum_{k=1}^{N} {max}_{k\textsuperscript{'}>= k} {P(k\textsuperscript{'})} {\Delta}r(k)$$
 
-\subsection{Mean Average Precision across all the classes the model was trained on}
-	Mean average precision, {mAP} is the mean of the {AP} values calculated for each of the classes supported by the model. 
 
-\subsection{Evaluation User Interface}
 
-	A detailed and comparative visualization of the model output and model result analyses will improve the process of discovering the robustness and vulnerabilities of selected model tremendously. Thus for each model that users selected, the UI of the evaluation panel can be elaborated as follows: \par
-	1. Frame by frame video visualization. 
-By looking at the ground truth and predicted bounding boxes of one annotated video frame by frame, users can determine the precision of models in an intuitive way.\par
-	2. Precision-Recall Curve per frame/video visualization. 
-By plotting the Precision-Recall Curve in both specific and conclusive manner, users can review the output of their models from a general but precise angle.\par
-	3. True positive, false positive, true negative, false negative and mean Average Precision list visualization. 
-With these specific and decisive variables displaying, users can see the correlations between the predicted bounding boxes and ground truth results, as well as the correlations between video bounding box visualization and Precision-Recall Curves.\par
-From these perspectives, users now can conceive a comprehensive view of their models, thus improvement and selection for the models can be recognized and achieved easily.
+%\begin{figure}
+%\centering
+%\includegraphics[width=\figwidthb]{fig/iou_equation.png}
+%\caption{IoU equation.} \label{fig.structure}
+%\end{figure}
+
 
 
 	
