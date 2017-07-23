@@ -353,7 +353,7 @@ g} \fi
 % not capitalized unless they are the first or last word of the title.
 % Linebreaks \\ can be used within to get better formatting as desired.
 % Do not put math or special symbols in the title.
-\title{End-to-end pipeline for ground truth generation, video annotation and evaluation of object classifier models}
+\title{End-to-end pipeline for ground truth generation, video annotation and evaluation of object detection models}
 %Improved Video Annotation and Modelling tool
 
 % author names and affiliations
@@ -381,7 +381,7 @@ g} \fi
  \IEEEauthorblockA{Computer Engineering Department\\
  San Jose State University (SJSU)\\
  San Jose, CA, USA
- Email: \{unnikrishnan.kizhakkemadamsreekumar, kaikai.liu\}@sjsu.edu}
+ Email: \{unnikrishnan.kizhakkemadamsreekumar, qi.li, revathy.devaraj, kaikai.liu\}@sjsu.edu}
  }
  
 % conference papers do not typically use \thanks and this command
@@ -421,7 +421,7 @@ g} \fi
 % As a general rule, do not put math, special symbols or citations
 % in the abstract
 \begin{abstract}
-Video annotation as a means to gather training data-set is proven to be beneficial in the progress of machine learning(ML) and deep learning(DL) techniques. The process of generating training data-set from video sequences, most of the time, requires large amount of manual effort. With this paper, we propose an user friendly front-end tool that supports semi-automated video annotation to generate training data-set with considerably less manual effort thereby reducing the time taken for DL model development. In addition to supporting semi-automated annotation, the tool provides interface for high level DL model evaluation and enables the developer to compare and analyze the performance of two or more models, thereby integrating the dataset generation, testing and evaluation of the models under one framework. With this proposal we also present various evaluation metrics used to asses the quality of annotation and hence the performance of the ML models.
+Video annotation as a means to gather ground truth is proven to be beneficial in the progress of machine learning(ML) and deep learning(DL) techniques like object detection. To develop such learning models or to re-train existing models, researchers and developers heavily rely on ground truth dataset to train their neural-networks(NN). The process of generating ground truth from video sequences, most of the time, requires large amount of manual effort. Today, to develop a product using an extant model, there is no framework that guides through the process of selecting a viable model. In the cycle of Artificial Intelligence(AI) enabled application development, fast ground truth generation and model selection are closely connected tasks which could be worked on together. With this paper, we propose an user friendly front-end tool that supports semi-automated video annotation to generate ground truth with considerably less manual effort, especially focussing on the hand picked object-classes a product developer has in mind. In addition to supporting semi-automated ground truth generation, the tool provides interface for high level model evaluation. Such an evaluation, with the proposed system, guides the developer to visually compare and analyse the performance of two or more models. The main contribution of this paper is to show a detailed methodology to perform the closely connected tasks of fast dataset generation, testing and evaluation of extant models. Obtained results suggest that such a system will drastically reduce the cost associated with AI application development. 
 \end{abstract}
 
 % no keywords
@@ -441,10 +441,48 @@ Semi-Automated Video annotation, model evaluation metrics, multi-model interacti
 
 
 \section{Introduction}
-Deep learning has gained its momentum in near past with the increase in the availability of training data-set. As generation of training data-set for developing models requires significant manual effort and in the view of the fact that the models are in turn developed to reduce human intervention in a specific task, the idea of using the pre-trained models to generate data-set promises to be an efficient methodology to ground truth generation. This paper intends to develop such an ecosystem with multiple pre-trained models and thus providing a framework for model development. In this paper, we propose an interactive multi-model video annotation tool where one can select model, auto-annotate objects, evaluate the results, visualize the performance metrics and work on rapid prototyping of the ML models is the holy grail of model based application development and research.\par
-The system keeps track of the evaluation metric in terms of object classification accuracy, bounding box precision and undetected objects that are manually added. This evaluation metric could even help the researcher to easily track weak spots and improve on the learning algorithm. The comprehensive evaluation module deals wi automatic model evaluation with easy to understand representation of pitfalls, accuracy measures and errors on a per class, per frame, per video basis. \par
+
+With this paper, we propose three major advents:
+1) The automatic ground truth (GT) generation capability, for the classes specifically asked for by the user. The tool proposed in the paper is mainly for deep neural network based object detection and classification models.
+2) An easy way to plug in any object detection and classification model from the long, ever growing list of such exciting new models. s
+3) Evaluate the performance of these models on the decided list of classes on a high level. The evaluation metric we use are highly precise and take care of evaluating the predicted output against the GT.
+
+The proposed system, is called IVADL (Improved Video Annotation and more for Deep Learning).
+
+1) Automatic GT generation is not something new. \cite{dominguez2014gtgencv} explains a similar methodology of generating semi-automated GT which reduces human intervention and thus resulting in faster GT generation. Papers like \cite{comaschi2014gtgencv} and \cite{kavasidis2012gtgencv} also explored ways to generate accurate GT by using Computer Vision algorithms to detect contours and objects. The use of "the wisdom of the crowd" (\cite{dominguez2014gtgencv}) to derive the best results from the outputs of multiple Computer Vision algorithms excited us. We decided to give an auto-annotation feature where the system run precision tests between multiple predictions on the same frame to come up with the GT decision as derived from multiple object-detection models. \par
+Unlike the extant systems addressing GT generation, the system proposed in this paper utilises neural networks. Also, the system as such is meant to generate ground truth for the classes a particular application developer would desire. When generating GT, there are multiple aspects to care about. Some of those attributes are:
+a) accurate bounding boxes around the object.
+b) exact classification information.
+c) object ID as tracked between frames in a video or an image-list.
+
+2) The system proposes a generic, yet simple programming interface to plugin object detection models. The model shall implement the API with:
+a) A function that defines all the classes of interest, input video or image-list. This defines the interface to invoke a model.
+b) A callback function that has to be implemented within the purview of the model wherein each predicted object is represented as a bounding box (BB).
+c) The API interface defines the data structures in a way that any model could inherently include an object tracking mechanism or rely on IVADL's object tracking mechanism where in BB's from multiple frames are tracked with a unique BB identifier (BBID).
+
+With the above two modules of the proposed system, we shall be able to generate GT in a very limited time for humongous input data videos or image lists. After the interim-GT generation, the proposed system gives the human user a easy-to-use Graphical User Interface (GUI) to easily correct BB's classification confidence and tracking confidence aspects. Such corrected GT are the key information helping researchers in the field to solve real-world problems. 
+
+Most of the existing solutions, like NVIDIA DIGITS, that allow models to be plugged in depends on a broad programming interface defined by a framework, like Caffe, tensorflow or darknet. The proposed interface is as simple as the two functions discussed above enabling developers to easily plugin a number of models into IVADL. These models in-turn could be an open-source evaluation wrapped with one of the frameworks. 
+
+3) Now, with an established GT produced with the desired list of classes, a developer would wish to quickly compare multiple models (those used for interim-GT generation and probably more) against the final GT. The proposed system uses state of the art evaluation criteria similar to the techniques discussed in \cite{everingham2010vocchallenge} to generate a comprehensive evaluation report that can be visualised in an improved easy-to-understand GUI.
+The GUI shall include individual sections describing the evaluation results of each model. These sections are divided into two main compartments:
+a) The report to be visualised per frame.
+\begin{itemize}
+	\item A video player playing back the video or list of images on which the objects are detected. The object detection output, namely the BB's shall be coloured in a way the developer can easily make out the correctness of each of the BB's.
+	\item A graph visualiser which would be in sync with the above video area. The graph plots evaluation report for each frame.
+	\item Class specific statistical data elements denoting precision and accuracy of detections per frame shall be displayed in a tabular form.
+\end{itemize}
+b) The report to be visualised for the entire video or image-list.
+\begin{itemize}
+	\item A graph visualiser which would plot the evaluation report for the entire video or image-list.
+	\item Class specific statistical data elements denoting precision and accuracy for all the detections in the video or image-list shall be displayed in a tabular form.
+\end{itemize}
+The GUI shall be explained in detail in the following sections.
+
+Such an interactive multi-model video annotation tool where one can select model(s), auto-annotate objects, evaluate the results, visualise the performance metrics and work on rapid prototyping of application is the holy grail of neural-network based application development and research.\par
+The system keeps track of the evaluation metric in terms of object classification accuracy, bounding box precision and undetected objects that are manually added. This evaluation metric could even help the researcher to easily track weak spots and improve on the learning algorithm. The comprehensive evaluation module integrates easy to understand representation of pitfalls, accuracy measures and errors on a per class, per frame, per video basis. \par
 The system discussed in this paper is developed as part of a research project aimed at creating an ecosystem that supports easy ground truth generation, model evaluation and application development. The tool helps developers to quickly generate ground truth for classes of interest, evaluate available DNN models for those classes. \par
-In order to reduce the annotation work for the worker, BeaverDam uses interpolation to annotate a video between two manually annotated frames. Although this approach lowers the complexity for the worker, the accuracy for bounding boxes are not guaranteed and the interpolated results are discarded during the process. In this paper, we will present a new approach to generate the annotated bounding boxes automatically with a high precision.\par
+In order to reduce the annotation work for the worker, BeaverDam uses interpolation to annotate a video between two manually annotated frames. Although this approach lowers the complexity for the worker, the accuracy for bounding boxes are not guaranteed and the interpolated results are discarded during the process. In this paper, we will present a new approach to generate the annotated bounding boxes automatically with high precision.\par
 Furthermore, the system discussed in this paper supports labelling and learning an infinite number of classes.  \par
 
 \section{Proposed System}\label{sec.overview}
@@ -531,6 +569,21 @@ FRCNN & 723 & 0 & 3 & 5 & 0.99 & 0.974 \\
 \includegraphics[width=\figwidthb]{fig/pr_yolo.png}
 \caption{Prediction recall curve when we ran YOLO, class "Car" for a 2 second video.} \label{fig.structure}
 \end{figure}
+
+\subsection{Average Precision for each class}
+	Average precision is the single number derived from the above graph, simply by taking the area under the plotted curve.
+	$${AP} = \int_{0}^{1} P(r) dr$$
+	Practically the area under the curve could be implemented as:
+	$${AP} = \sum_{k=1}^{N} P(k) {\Delta}r(k)$$
+\subsection{Interpolated Average Precision for each class}
+	Interpolated average precision is calculated the same way as we calculated {AP} above, but, instead of using {P(k)}, the maximum precision value: 
+	$${max}_{k\textsuperscript{'}>= k} {P(k\textsuperscript{'})}$$
+	Thus:
+	$${IAP} = \sum_{k=1}^{N} {max}_{k\textsuperscript{'}>= k} {P(k\textsuperscript{'})} {\Delta}r(k)$$
+
+\subsection{Mean Average Precision across all the classes the model was trained on}
+	Mean average precision, {mAP} is the mean of the {AP} values calculated for each of the classes supported by the model. 
+
 \subsection{Future Work}
 
 
@@ -541,8 +594,6 @@ FRCNN & 723 & 0 & 3 & 5 & 0.99 & 0.974 \\
 %\includegraphics[width=\figwidthb]{fig/iou_equation.png}
 %\caption{IoU equation.} \label{fig.structure}
 %\end{figure}
-
-
 
 	
 %Math symbol: $\hat{r}_{n,m}^{(k)}$.
@@ -707,6 +758,17 @@ A. Sorokin and D. Forsyth. Utility data annotation with amazon mechanical turk. 
 
 \bibitem{deng2009imgnet}
 J. Deng, W. Dong, R. Socher, L.-J. Li, K. Li, and L. Fei-Fei, ?ImageNet: A Large-Scale Hierarchical Image Database,? in CVPR09, 2009.
+
+\bibitem{dominguez2014gtgencv}
+G. F. Dominguez, "Semi-automatic Generation of Accurate Ground Truth Data in Video Sequences," in 
+\textit{2014 International Conference on Advances in Computing, Communications and Informatics.}, New Delhi, 2014, pp. 310-315. doi: 10.1109/ICACCI.2014.6968309
+
+\bibitem{kavasidis2012gtgencv}
+I. Kavasidis, "A Semi-automatic Tool for Detection and Tracking Ground Truth Generation in Videos," in \textit{Proceedings of the 1st International Workshop on Visual Interfaces for Ground Truth Collection in Computer Vision Applications.}, Capri, 2012, pp. 1-5. doi: 10.1145/2304496.2304502
+
+\bibitem{comaschi2014gtgencv}
+F. Comaschi et al., "A tool for fast ground truth generation for object detection and tracking from video," in \textit{IEEE International Conference on Image Processing (ICIP)}, Paris, 2014, pp. 368-372. doi: 10.1109/ICIP.2014.7025073
+
 
 \end{thebibliography}
 % that's all folks
