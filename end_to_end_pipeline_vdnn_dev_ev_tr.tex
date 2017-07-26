@@ -353,7 +353,7 @@ g} \fi
 % not capitalized unless they are the first or last word of the title.
 % Linebreaks \\ can be used within to get better formatting as desired.
 % Do not put math or special symbols in the title.
-\title{End-to-end pipeline for ground truth generation, video annotation and evaluation of object detection models}
+\title{Model-Driven Automatic Annotation and Evaluation Tool for Deep Learning Applications}
 %Improved Video Annotation and Modelling tool
 
 % author names and affiliations
@@ -494,12 +494,26 @@ The system discussed in this paper is developed as part of a research project ai
 In order to reduce the annotation work for the worker, BeaverDam uses interpolation to annotate a video between two manually annotated frames. Although this approach lowers the complexity for the worker, the accuracy for bounding boxes are not guaranteed and the interpolated results are discarded during the process. In this paper, we will present a new approach to generate the annotated bounding boxes automatically with high precision.\par
 Furthermore, the system discussed in this paper supports labelling and learning an infinite number of classes.  \par
 
-\section{Proposed System}\label{sec.overview}
-
 \subsection{Motivation}
 
+\section{Proposed System}\label{sec.overview}
+In this paper we propose a web based application that is built on the existing Beaver Dam Video annotation tool \cite{dominguez2014gtgencv}.  
+The beaver dam tool supports manual annotation of video frames with basic features of label selections, user account management, and video uploads as explained in \cite{dominguez2014gtgencv}. 
+Our contribution to this proposal is by adding new features and mechanism that converts the existing tool to model-driven semi-automated annotation tool which supports evaluation of the models.
+
+\subsection{Feature Design}
+While BeaverDam\cite{dominguez2014gtgencv} and other Video annotation tools \cite{dominguez2014gtgencv} \cite{dominguez2014gtgencv}  is designed to generate frame by frame ground truth dataset, it still requires human effort to perform annotation. 
+As we mainly focus on reducing human effort and to improve the annotator interface, our key contribution to this paper is addition of the new features that support 3 major functionalities : (i)  object detection model plug-in interface (ii)  user interface to configure, run, view, correct and evaluate the semi-auto annotation (iii) display the annotation and evaluation results graphically for image-list and video data.
+To enable user to plug-in multiple models and select a particular model to run annotation, we add module interface feature.
+Considering the fact that different models uses different frameworks, flexible APIs for adding modules to the system is provided along with the interface to select the list of class labels required by the user. Although the model could support more than the user selected class labels, this filtered list lets the user to work only on selected labels list. 
+For selecting the functionalities to configure, annotate or evaluate the models, we built the system with simple user interface using buttons and drop down list. The proposed tool can be configured to run annotation for an image-list or video sequence.
+Once the model generates interim labelled dataset, on clicking 'evaluate' button, the computed metrics for selected models and classes is displayed in evaluation report view. For easy interpretation and comparison of metrics, we present the results graphically using tables and graphs. 
+The bounding box precision values for auto-annotated objects are color coded and shown with the red box indicating missed predictions, green box indicating good prediction and blue indicates precision below 50 \%. This helps user to quickly evaluate the annotation quality frame by frame. 
+The user interface to display the evaluation results of multiple models are built for easy interpretation of the computed metrics. 
+Graphical display of selected evaluation results are displayed along with the video.
+
 \subsection{System Architecture}
-The Integrated Video Annotation for Deep Learning (IVADL) tool is a web application built on the existing Beaver Dam Video annotation tool [1] . The proposed system consists of three major components: (i) A server and the database with the evaluation engine (ii) The Client Interface(CI) with an easy-to-use User Interface(UI) to display the annotation and evaluation results (iii) The Model Interface(MI) that connects the pre-trained classification models used for auto-annotation. Fig [1]  describes the architecture of the proposed system with each module described in detail in the preceding sub-sections. 
+The proposed system consists of three major components: (i) A server and the database with the evaluation engine (ii) The Client Interface(CI) with an easy-to-use User Interface(UI) to display the annotation and evaluation results (iii) The Model Interface(MI) that connects the pre-trained classification models used for auto-annotation. Fig [1]  describes the architecture of the proposed system with each module described in detail in the preceding sub-sections. 
 
 \begin{figure}[htb]
 \centering
