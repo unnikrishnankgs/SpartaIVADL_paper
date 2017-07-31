@@ -154,6 +154,9 @@
 % http://www.tug.org/applications/pdftex
 
 
+% **** COMBINE FIGS ****
+
+%\usepackage[demo]{graphicx}
 
 
 
@@ -344,6 +347,24 @@ g} \fi
 % correct bad hyphenation here
 \hyphenation{op-tical net-works semi-conduc-tor}
 
+\newcounter{eqn}
+\renewcommand*{\theeqn}{\alph{eqn})}
+\newcommand{\num}{\refstepcounter{eqn}\text{\theeqn}\;}
+
+\makeatletter
+\newcommand{\putindeepbox}[2][0.7\baselineskip]{{%
+    \setbox0=\hbox{#2}%
+    \setbox0=\vbox{\noindent\hsize=\wd0\unhbox0}
+    \@tempdima=\dp0
+    \advance\@tempdima by \ht0
+    \advance\@tempdima by -#1\relax
+    \dp0=\@tempdima
+    \ht0=#1\relax
+    \box0
+}}
+\makeatother
+
+
 
 \begin{document}
 %
@@ -421,20 +442,24 @@ g} \fi
 % As a general rule, do not put math, special symbols or citations
 % in the abstract
 \begin{abstract}
+Deep learning depends on a steady supply of the good, structured and labeled data set for supervised learning. To develop such learning models or to re-train existing models, researchers and developers heavily rely on ground truth data set to train their neural-networks (NN). There are already a large number of free and publicly shared labeled data sets that cover a variety of categories. However, many of existing collections aren't so broadly useful and limited to some old and free data. Many current valuable datasets owned by stakeholders are not usable as it is likely in a simple unlabeled raw format and not allowed for free downloading due to legal regulations. Limited by the available labeled data set, AI researchers face significant challenges in getting, downloading, and annotating this data set. As a result, many of their research results cannot be applied to real world applications due to this mismatch. In this paper, we propose an automatic model-driven annotation and evaluation tool for video and image based object detection applications. To reduce a large amount of manual effort in annotation, we apply existing pre-trained deep learning models to perform object detection and extract the bounding boxes. Users can evaluate and adjust the detection results to generate ground truth with considerably less manual effort. In the meantime, our evaluation engine will provide real-time and accumulated evaluation metrics on top of the visualization interface to guide the researchers select the best model or fine-tune the existing model. To solve the data permission problems and forbid the illegal downloading, we develop a secure streaming engine that source the video and image data set to the annotation and training engine with remote processing. Our prototype system will drastically reduce the efforts associated with data preparation and evaluation by providing a single user web interface for researchers to experiment their solutions.
+
+\iffalse
 Video annotation as a means to gather ground truth is proven to be beneficial in the progress of machine learning(ML) and deep learning(DL) techniques like object detection and classification. 
 To develop such learning models or to re-train existing models, researchers and developers heavily rely on ground truth dataset to train their neural-networks(NN). 
 The process of generating ground truth from video sequences, most of the time, requires large amount of manual effort. 
 To our knowledge, to develop a DL application, there is no framework that guides through the process of selecting a viable model. 
-With this paper, we propose an user friendly front-end tool that supports semi-automated video annotation to generate ground truth with considerably less manual effort, especially focussing on the object-classes a product developer could choose. 
-In addition to supporting semi-automated ground truth generation, the tool provides interface for high level model evaluation. 
+With this paper, we propose an user friendly front-end tool that supports automated video annotation to generate ground truth with considerably less manual effort, especially focussing on the object-classes a product developer could choose. 
+In addition to supporting automated ground truth generation, the tool provides interface for high level model evaluation. 
 Such an evaluation, with the proposed system, guides the developer to visually compare and analyse the performance of two or more models. 
 The main contribution of this paper is to show a detailed methodology to perform the closely connected tasks of fast dataset generation, testing and evaluation of extant models. 
 Obtained results suggest that such a system will drastically reduce the cost associated with DL application development. 
+\fi
 \end{abstract}
 
 % no keywords
 \begin{IEEEkeywords}
-Semi-Automated Video annotation, model evaluation metrics, multi-model interactive auto-annotation tool, ground truth generation.
+Automated Video annotation, model evaluation metrics, multi-model interactive auto-annotation tool, ground truth generation.
 \end{IEEEkeywords}
 
 % For peer review papers, you can put extra information on the cover
@@ -457,7 +482,7 @@ With this paper, we propose three major advents:
 
 The proposed system, is called IVADL (Improved Video Annotation and more for Deep Learning).
 
-1) Automatic GT generation is not something new. \cite{dominguez2014gtgencv} explains a similar methodology of generating semi-automated GT which reduces human intervention and thus resulting in faster GT generation. Papers like \cite{comaschi2014gtgencv} and \cite{kavasidis2012gtgencv} also explored ways to generate accurate GT by using Computer Vision algorithms to detect contours and objects. The use of "the wisdom of the crowd" (\cite{dominguez2014gtgencv}) to derive the best results from the outputs of multiple Computer Vision algorithms excited us. We decided to give an auto-annotation feature where the system run precision tests between multiple predictions on the same frame to come up with the GT decision as derived from multiple object-detection models. \par
+1) Automatic GT generation is not something new. \cite{dominguez2014gtgencv} explains a similar methodology of generating automated GT which reduces human intervention and thus resulting in faster GT generation. Papers like \cite{comaschi2014gtgencv} and \cite{kavasidis2012gtgencv} also explored ways to generate accurate GT by using Computer Vision algorithms to detect contours and objects. The use of "the wisdom of the crowd" (\cite{dominguez2014gtgencv}) to derive the best results from the outputs of multiple Computer Vision algorithms excited us. We decided to give an auto-annotation feature where the system run precision tests between multiple predictions on the same frame to come up with the GT decision as derived from multiple object-detection models. \par
 Unlike the extant systems addressing GT generation, the system proposed in this paper utilises neural networks. Also, the system as such is meant to generate ground truth for the classes a particular application developer would desire. When generating GT, there are multiple aspects to care about. Some of those attributes are:
 a) accurate bounding boxes around the object.
 b) exact classification information.
@@ -496,13 +521,13 @@ Furthermore, the system discussed in this paper supports labelling and learning 
 \subsection{Motivation}
 
 \section{Proposed System}\label{sec.overview}
-In this paper we propose a web based application that is built on the existing Beaver Dam Video annotation tool \cite{dominguez2014gtgencv}.  
-The beaver dam tool supports manual annotation of video frames with basic features of label selections, user account management, and video uploads as explained in \cite{dominguez2014gtgencv}. 
-Our contribution to this proposal is by adding new features and mechanism that converts the existing tool to model-driven semi-automated annotation tool which supports evaluation of the models.
+In this paper we propose a web based application that is built on the existing BeaverDam Video annotation tool \cite{dominguez2014gtgencv}.  
+The BeaverDam tool supports manual annotation of video frames with basic features of label selections, user account management, and video uploads as explained in \cite{dominguez2014gtgencv}. 
+Our contribution to this proposal is by adding new features and mechanism that converts the existing tool to model-driven annotation tool.
 
 \subsection{Feature Design}
 While BeaverDam\cite{dominguez2014gtgencv} and other Video annotation tools \cite{dominguez2014gtgencv} \cite{dominguez2014gtgencv}  is designed to generate frame by frame ground truth dataset, it still requires human effort to perform annotation. 
-As we mainly focus on reducing human effort and to improve the annotator interface, our key contribution to this paper is addition of the new features that support 3 major functionalities : (i)  object detection model plug-in interface (ii)  user interface to configure, run, view, correct and evaluate the semi-auto annotation (iii) display the annotation and evaluation results graphically for image-list and video data.
+As we mainly focus on reducing human effort and to improve the annotator interface, our key contribution to this paper is addition of the new features that support 3 major functionalities : (i)  object detection model plug-in interface (ii) user interface to configure, run, view, correct and evaluate the annotation (iii) display the annotation and evaluation results graphically for image-list and video data.
 To enable user to plug-in multiple models and select a particular model to run annotation, we add module interface feature.
 Considering the fact that different models uses different frameworks, flexible APIs for adding modules to the system is provided along with the interface to select the list of class labels required by the user. Although the model could support more than the user selected class labels, this filtered list lets the user to work only on selected labels list. 
 For selecting the functionalities to configure, annotate or evaluate the models, we built the system with simple user interface using buttons and drop down list. The proposed tool can be configured to run annotation for an image-list or video sequence.
@@ -531,6 +556,76 @@ The metric analysis engine is a part of server that performs high-level evaluati
 \subsubsection{Client interface (CI)}
 The client interface is a web browser where it shall render the user interfaces for: (i) Manual correction of video annotation (ii) Selection and configuration of classifier model (iii) running auto-annotation (iv) view comprehensive evaluation report. The precision of all bounding boxes are color coded to visually represent the values. The UI supports list of labels that can be auto-annotated by the models and enables user to filter the labels to view and evaluate those classes. The evaluation summary view presents the data for each model selected for evaluation with the video play option to support per frame evaluation. 
 
+\section{Object Tracking Support}\label{sec.objtrack}
+The tool helps a researcher in detecting and labelling objects on input video/image frames. But, there is a high demand on getting more intelligent results with annotation tools. 
+Popular opensource annotation tools provide some level of object tracking support. VATIC \cite{carl2012vatic} uses optical flow [TODO: cite optical flow] 
+and BeaverDam \cite{shen2016beaverdam} uses simple linear interpolation. 
+Influenced by these tools, with our model driven auto annotation engine, we automatically track detected objects in subsequent frames and attach a bounding-box ID (BBID). 
+We use a combination of optical flow [TODO: cite], median flow [TODO: cite] and linear interpolation. 
+The decision of enabling the tracking support for auto-annotation as well as which tracking algorithm to be used is configurable. 
+The configuration is decided by the user based on a lot of considerations. 
+Example, while testing our real-time auto-annotation feature (\ref{sec.autoannotationedgedev}), on an edge device, namely JETSON TX2, we enabled linear interpolation with median flow to achieve 
+better performance.
+
+\subsection{Intelligent Object Tracking}
+The object tracking module devise a methodology where we use both:
+1) Optical flow based tracking of the mid-point of a bounding box detected.
+2) Median flow based tracking of the entire bounding box. 
+We use Intersection over Union (IoU) between actual objects in the next frame and each of the tracked bounding boxes as a score to pick the best tracking result or combine the results. The module suggests the finalised bounding box as the tracked bounding box which is used to assign a unique BB-ID which shall be the same for independent objects in the video.
+Usage of optical flow, in depth, helps the module track objects like vehicles from different view points. Say, if a car in the initial frame was facing towards the camera and in the next frame changed its direction where its side faces the camera. Such situations are easily trackable using optical flow whereas median flow or kernelized correlation filter. (TODO make more clear after reading these papers: KCF, Median flow, TLD) Their filter based tracking methodology helps in tracking the object by its whole appearance which could fail if the object's orientation change, but will be robust when the object moves along the frame at different exposure levels.
+
+\begin{figure}
+\makebox[\linewidth]{
+\num\includegraphics[scale=0.05]{fig/wo_of/wo_of1.eps}
+\num\includegraphics[scale=0.05]{fig/wo_of/wo_of2.eps}
+}
+\makebox[\linewidth]{
+\num\includegraphics[scale=0.05]{fig/wo_of/wo_of3.eps}
+}
+\caption{The white "Small Truck" in the centre of the intersection, with BB-ID {21} uses only median flow for tracking.
+As we can see, in figure b), an SUV blocks the truck thereby causing the object tracker to fail and assign a new BB-ID {208} to the truck.}
+\label{fig:wo_of}
+\end{figure}
+
+\begin{figure}
+\makebox[\linewidth]{
+\num\includegraphics[scale=0.05]{fig/w_of/w_of1.eps}
+\num\includegraphics[scale=0.05]{fig/w_of/w_of2.eps}
+}
+\makebox[\linewidth]{
+\num\includegraphics[scale=0.05]{fig/w_of/w_of3.eps}
+\num\includegraphics[scale=0.05]{fig/w_of/w_of4.eps}
+}
+\caption{The white "Small Truck" in the centre of the intersection, with BB-ID {21} uses our intelligent object tracking.
+As we can see, in the figure c) even if a traffic pole block the truck, optical flow is able to still track it.}
+\label{fig:w_of}
+\end{figure}
+
+
+\iffalse
+\begin{tabular}{cc}
+\makebox[\textwidtht]{\includegraphics{fig/w_of/w_of1.eps}}
+    & \makebox[\textwidtht]{\includegraphics{fig/w_of/w_of1.eps}} \\
+  \makebox[\textwidth]{\includegraphics{fig/w_of/w_of1.eps}}
+    & \makebox[\textwidth]{\includegraphics{fig/w_of/w_of1.eps}} \\
+\end{tabular}
+\fi
+
+\iffalse
+\noindent\null\hfill\includegraphics{fig/w_of/w_of1.eps} \hfill
+\includegraphics{fig/w_of/w_of2.eps} \hfill\null
+\fi
+\iffalse
+\begin{figure}[!htb]
+\centering
+\includegraphics[width=\figwidthb]{fig/wo_optical_flow.eps}
+\caption{The object tracking module results without optical flow.} \label{fig.structure}
+\end{figure}
+\centering
+\includegraphics[width=\figwidthb]{fig/w_optical_flow.eps}
+\caption{The object tracking module results with optical flow.} \label{fig.structure}
+\end{figure}
+\fi
 
 \section{Methodology}
 \subsection{Annotation Method} \label{sec.annotation}
@@ -543,6 +638,17 @@ This ground truth data is then used for the evaluation of each of the object cla
 Let F = \textit{ f1, f2, f3,.., fn}  be the video sequence with n frames Let P =  \textit{p1, p2, p3,..., pn}  be the predicted  object list for corresponding frames of F, generated by the classifier model. Let BB be the set of bounding boxes that represent the classified objects in F and  for each object let bbx =  \textit{x, y, w, h, f, t} where  x ,y is  X co-ordinate and Y co-ordinate of the starting point of a bounding box, w is width of the bounding box, h is height of the bounding  box, f is the frame id where the bounding box is located, t is the tracker flag updated by the object tracking model . On running the selected classifier models on F, initial ground truth list P is generated.Currently the system we propose employs manual correction of P to generate G, where G is the final ground truth with the highest accuracy that is to be used for evaluation of other models integrated to the system. \par
 
 Along with annotation of objects, we propose to use object tracking models to correlate the predicted bounding boxes of each frame in F. [add details about object tracker]. After generating G, the result of the annotation phase on running model 1 is P1 object list, for model 2 is P2 object list.
+
+\subsection{Auto Annotation using camera feed on edge devices}
+Considering the difficulty in ground truth generation, we developed a feature that accepts a camera feed on edge devices that host our tool. 
+Such devices could be deployed at say traffic intersections. The camera enabled NVIDIA TX2 device was hosted at a traffic intersection. 
+The IVADL tool was configured to use YOLO [TODO: cite, YOLO first paper and YOLO9000 here] for object detection and median flow tracking with linear interpolation. 
+This feature is configured to run the GPU intensive object tracker CNN only at a fixed interval (say, {FI} frames). 
+That means, the first frame is fed into the CNN, and the tool skips {FI-2} frames. 
+The following frame, {FI} is then fed into the tracking module along with first frame and the detected bounding-boxes. 
+The tracking module assumes input frame as reference along with bounding-boxes, track these boxes/objects in the frame {FI}, thereby generating tracked bounding-boxes.
+Now, the tool is configured to use linear interpolation to generate bounding boxes between first frame and frame {FI}.
+With the above configuration, we were able to achieve 30 fps auto-annotation speed on NVIDIA JETSON TX2, by offloading 29 frames to the tracking and interpolation modules.  
 
 \subsection{Evaluation Method} \label{sec.evaluation}
 The evaluation of P1,P2 objects list described in section \ref{sec.annotation} are based on the method used by PASCAL VOC09 challenge evaluation [1]. According to PASCAL VOC evaluation[1] three accuracy metrics are computed to evaluate a multi-class models (i) Precision-Recall values with different rank cutoff (ii) Average precision representing the area of Precision-Recall curve (iii) mean average precision for all the classes in a multi-class model. Prior to the computation of above listed accuracy metrics, the predicted objects and its bounding boxes are verified against the ground truth objects by calculating its IoU (Intersection of Union) and the computation details are explained in the following subsection.
@@ -565,6 +671,20 @@ The common evaluation metrics for classification models has 4 basic accuracy cou
 \subsubsection{Precision Recall Graph for each class}
 The performance of a model is denoted by numerical value called Average precision of a class in a multi-class model. A model is considered good if its with high precision and recall values measured for different ranks values. Thus the area under precision-recall curve represents models performance and it is plotted between the precision and recall values of a class across the frame or video for different subsets of predicted output, giving us a pretty good visualization of the model quality. The subset used here is sampled from the list of classified bounding boxes, sorted with the model's rank. Popular evaluation models like the one used with VOC Challenge[1] uses a 11-point sampling, but we propose the more accurate k-point sampling, where we plot precision-recall values for every subset that results a change in the recall metric.
 	$${AP} = \sum_{k=1}^{N} P(k) {\Delta}r(k)$$
+\begin{figure}[!htb]
+\centering
+\includegraphics[width=\figwidthb]{fig/pr_rcnn.eps}
+\caption{Prediction recall for the automatic annotations generated using RCNN, classes "Car" and "Truck" for a 2 second video.} \label{fig.structure}
+\end{figure}
+
+\iffalse
+\begin{figure}
+\centering
+\includegraphics[width=\figwidthb]{fig/pr_yolo.png}
+\caption{Prediction recall curve when we ran YOLO, class "Car" for a 2 second video.} \label{fig.structure}
+\end{figure}
+\fi
+
 \subsubsection{Mean Average Precision}
 	Mean average precision, {mAP} is the mean of the {AP} values calculated for each of the classes supported by the multi-class model. This measure is a single-valued metric used to compare the models performance. Model with high value of {mAP} is the desired one used for application. The evaluation results enables the user to compare different models and select the model for a specific application. This system thus provides the user mechanism for rapid ground truth generation and model selection.The evaluation metrics are displayed in the below table format,
 \begin{align}
@@ -579,24 +699,49 @@ FRCNN & 723 & 0 & 3 & 5 & 0.99 & 0.974 \\
 \end{tabular}
 \end{align}
 
-
-
-
 \section{Experiments} \label{sec.experiment}
-\subsection{Data} \label{sec.data}
+\subsection{Experimental Setup} \label{sec.data}
+The proposed tool is available opensource. The tool provide users a web based interface to work with videos or image lists that need to be automatically annotated. 
+The user interface of a job-page primarily has a video player view with seek bar, play, pause, traverse-left-right, and other generic buttons. 
+The player screen will show the video or images we can annotate. 
+A list of object classes will also be visible along with a sliding panel menu. 
+The menu window shows the interface to trigger automatic annotation at "Run Model", trigger evaluation of all loaded models with "Evaluation" and so on. 
+This window also houses configuration options to configure the model(s), tracking feature, etc.
+\begin{figure}[!htb]
+\centering
+\includegraphics[width=\figwidthb]{fig/job_page.eps}
+\caption{The job page user interface.} \label{fig.structure}
+\end{figure}
+As we can see in the above user interface, the auto annotations generated shall be bounding boxes with assigned colors for each object class.
+The user can then click and drag any bounding boxes that need correction.
+
+\subsection{Generated Automatic Annotation Results} \label{sec.autoannres}
+We used the AP, mAP scores to evaluate our automatic annotation tool results. 
+A job was added with a two second long video captured at a traffic intersection. 
+There were a number of vehicles passing by. 
+The intention of the job was to generate annotations automatically using pre-trained models. We chose to use two models and generate the automatic annotations. 
+This way, we can later compare the generated annotations and pick the better result to manually correct any discrepancies and generate the ground truth. 
+The models that were loaded were a Faster-RCNN [TODO cite], TensorFlow based model which we plugged into the IVADL tool over the easy to use API interface provided by IVADL. 
+Similarly, we integrated the darknet framework and chose to run the YOLO [TODO cite YOLO paper 1] object detection model. 
+Although the Faster-RCNN model took more time (TODO mention the time taken for both) than the YOLO model, 
+Faster-RCNN seemed to have done a better job with the correctness of bounding boxes and class predications.
+The Average Precision score for "Car" class was {0.83} for Faster-RCNN model which thus was {52\%} more precise than the YOLO model.
+
+\subsection{Evaluation Visualisation Results}\label{sec.evalres}
+Evaluating the various deep learning object detection models is the one essential requirement in deep learning model and application development. 
+When we were developing our object tracking feature support for IVADL, about {70\%} of the development time was spent evaluating the current results achieved.
+When IVADL itself is a tool which helps evaluating object detection models, we decided to load two models, one with object tracking and the next without object tracking to evaluate the object tracking accuracy between multiple frames.
+We loaded darknet with YOLO object detection model in these two configurations. The configuration with object tracking performed reasonably well and comparable to the configuration without object tracking. The configuration with object tracking rely on tracking results to draw bounding boxes of intermediate frames.
+The following figure shows our visualisation results in an interactive web page.
+\begin{figure}[!htb]
+\centering
+\includegraphics[width=\figwidthb]{fig/eval_page.eps}
+\caption{The evaluation page user interface.} \label{fig.structure}
+\end{figure}
+TODO:
+Detail the video player panel, the graphs, the color boxes on the video and the comprehensive evaluation results table.
+
 \subsection{Results} \label{sec.results}
-\begin{figure}
-\centering
-\includegraphics[width=\figwidthb]{fig/pr_rcnn.png}
-\caption{Prediction recall curve when we ran RCNN, class "Car" for a 2 second video.} \label{fig.structure}
-\end{figure}
-
-\begin{figure}
-\centering
-\includegraphics[width=\figwidthb]{fig/pr_yolo.png}
-\caption{Prediction recall curve when we ran YOLO, class "Car" for a 2 second video.} \label{fig.structure}
-\end{figure}
-
 \subsection{Average Precision for each class}
 	Average precision is the single number derived from the above graph, simply by taking the area under the plotted curve.
 	$${AP} = \int_{0}^{1} P(r) dr$$
